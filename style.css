@@ -95,6 +95,23 @@ img {
   font-weight: 600;
 }
 
+.icon-links {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.icon-links a {
+  color: #555;
+  font-size: 1.4rem;
+  transition: color 0.15s;
+}
+
+.icon-links a:hover {
+  color: #1a6fb5;
+  text-decoration: none;
+}
+
 /* ====== SECTION HEADINGS ====== */
 
 section {
@@ -202,12 +219,25 @@ h3 {
   border-bottom: none;
 }
 
-.exp-date {
+.exp-left {
   flex-shrink: 0;
   width: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.exp-date {
   font-size: 0.9rem;
   color: #777;
-  padding-top: 2px;
+}
+
+.exp-logo {
+  width: 80px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .exp-details {
@@ -370,8 +400,10 @@ footer a:hover {
     gap: 4px;
   }
 
-  .exp-date {
+  .exp-left {
     width: auto;
+    flex-direction: row;
+    align-items: center;
   }
 
   .pub-item {

@@ -85,16 +85,21 @@ img {
 
 .profile {
   background: #fff;
-  padding: 50px 0 40px;
+  padding: 60px 0 50px;
   border-bottom: none;
 }
 
 .profile-inner {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  text-align: center;
-  gap: 24px;
+  gap: 48px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .profile-photo {
@@ -145,30 +150,27 @@ img {
 
 .icon-links {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: center;
-  justify-content: center;
 }
 
 .icon-links a {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #f0f4f8;
+  gap: 6px;
   color: #555;
-  font-size: 1.2rem;
-  transition: all 0.2s;
+  font-size: 1.1rem;
+  transition: color 0.2s;
 }
 
 .icon-links a:hover {
-  background: #1a6fb5;
-  color: #fff;
+  color: #1a6fb5;
   text-decoration: none;
-  box-shadow: 0 3px 12px rgba(26, 111, 181, 0.3);
-  transform: translateY(-2px);
+}
+
+.link-sep {
+  color: #ccc;
+  font-size: 1rem;
 }
 
 /* ====== SECTION HEADINGS ====== */
@@ -473,12 +475,17 @@ footer a:hover {
     gap: 20px;
   }
 
+  .profile-info {
+    align-items: center;
+  }
+
   .profile-photo {
-    width: 140px;
-    height: 140px;
+    width: 150px;
+    height: 150px;
   }
 
   .icon-links {
+    flex-wrap: wrap;
     justify-content: center;
   }
 

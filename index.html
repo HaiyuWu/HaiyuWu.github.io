@@ -225,8 +225,18 @@
 <!-- ==================== FOOTER ==================== -->
 <footer class="container">
   <p>&copy; 2025 Haiyu Wu. Last updated: Mar 2026.</p>
+  <p class="visit-counter"><i class="fa-solid fa-eye"></i> Visited <span id="visit-count">0</span> times</p>
   <p><a href="#">Back to Top</a></p>
 </footer>
 
+<script>
+(function() {
+  var el = document.getElementById('visit-count');
+  fetch('https://api.counterapi.dev/v1/haiyuwu-webpage/page-views/up')
+    .then(function(r) { return r.json(); })
+    .then(function(data) { el.textContent = data.count; })
+    .catch(function() { el.textContent = '-'; });
+})();
+</script>
 </body>
 </html>

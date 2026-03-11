@@ -501,6 +501,27 @@ footer {
   color: #aaa;
 }
 
+footer .visit-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  font-size: 0.85rem;
+  color: #bbb;
+  background: #f0f2f5;
+  padding: 4px 14px;
+  border-radius: 16px;
+}
+
+footer .visit-counter i {
+  font-size: 0.8rem;
+}
+
+footer .visit-counter #visit-count {
+  font-weight: 600;
+  color: #1a6fb5;
+}
+
 footer a {
   color: #aaa;
   transition: color 0.15s;

@@ -309,6 +309,7 @@ h3 i {
   color: #888;
   font-weight: 500;
   line-height: 1.3;
+  padding-top: 3px;
 }
 
 .exp-details {
@@ -316,7 +317,6 @@ h3 i {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-top: 2px;
 }
 
 .exp-details strong {

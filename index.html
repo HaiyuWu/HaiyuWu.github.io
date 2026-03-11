@@ -37,6 +37,7 @@
 <nav class="tab-nav">
   <div class="container tab-inner">
     <a href="#about" class="tab-link">About</a>
+    <a href="#news" class="tab-link">News</a>
     <a href="#experience" class="tab-link">Experience</a>
     <a href="#publications" class="tab-link">Publications</a>
     <a href="assets/cv.pdf" class="tab-link" target="_blank">CV</a>
@@ -76,12 +77,31 @@
   </div>
 </section>
 
+<!-- ==================== NEWS ==================== -->
+<section id="news">
+  <h2>News</h2>
+  <ul class="news-list">
+    <li>
+      <span class="news-date">Feb 2026</span>
+      <span class="news-text">One paper accepted to <strong>CVPR 2026</strong>: <a href="#pub-goldilocks">Goldilocks Test Sets for Face Verification</a>.</span>
+    </li>
+    <li>
+      <span class="news-date">Jul 2025</span>
+      <span class="news-text">Joined <a href="https://altoslabs.com/" target="_blank">Altos Labs</a> as a <a href="#exp-altos">Research Scientist</a>.</span>
+    </li>
+    <li>
+      <span class="news-date">Jan 2025</span>
+      <span class="news-text">One paper accepted to <strong>ICLR 2025</strong>: <a href="#pub-vec2face">Vec2Face</a>.</span>
+    </li>
+  </ul>
+</section>
+
 <!-- ==================== EXPERIENCE ==================== -->
 <section id="experience">
   <h2>Experience</h2>
   <div class="experience-list">
 
-    <div class="experience-item">
+    <div class="experience-item" id="exp-altos">
       <div class="exp-left">
         <div class="exp-date">Present</div>
         <img class="exp-logo" src="assets/altos-labs.png" alt="Altos Labs">
@@ -114,12 +134,12 @@
   <div class="pub-list">
 
 
-    <div class="pub-item">
+    <div class="pub-item" id="pub-goldilocks">
       <div class="pub-thumb"><img src="assets/goldilocks.png" alt=""></div>
       <div class="pub-content">
         <h3 class="pub-title">Goldilocks Test Sets for Face Verification</h3>
         <p class="pub-authors"><strong>Haiyu Wu</strong>, Sicong Tian, Aman Bhatta, Jacob Gutierrez, Grace Bezold, Genesis Argueta, Michael C. King, Kevin W. Bowyer</p>
-        <p class="pub-venue"><span class="venue-badge">CVPR 2026</span></p>
+        <p class="pub-venue"><span class="venue-badge">CVPR</span></p>
         <p class="pub-desc">We introduce a new protocol for assembling face verification test sets and provide three valuable commercial level test sets to the community.</p>
         <p class="pub-links">
           <a href="https://arxiv.org/pdf/2405.15965v3" target="_blank">PDF</a>
@@ -129,7 +149,7 @@
     </div>
 
     <!-- To add an image/gif: put the file in assets/ and set the src below -->
-    <div class="pub-item">
+    <div class="pub-item" id="pub-vec2face-plus">
       <div class="pub-thumb"><img src="assets/vec2face_plus.png" alt=""></div>
       <div class="pub-content">
         <h3 class="pub-title">Vec2Face+ for Face Dataset Generation</h3>
@@ -143,7 +163,7 @@
       </div>
     </div>
 
-    <div class="pub-item">
+    <div class="pub-item" id="pub-vec2face">
       <div class="pub-thumb"><img src="assets/vec2face.gif" alt=""></div>
       <div class="pub-content">
         <h3 class="pub-title">Vec2Face: Scaling Face Dataset Generation with Loosely Constrained Vectors</h3>
@@ -158,7 +178,7 @@
       </div>
     </div>
 
-    <div class="pub-item">
+    <div class="pub-item" id="pub-logicnet">
       <div class="pub-thumb"><img src="assets/logicnet.png" alt=""></div>
       <div class="pub-content">
         <h3 class="pub-title">LogicNet: A Logical Consistency Embedded Face Attribute Learning Network</h3>
@@ -171,7 +191,7 @@
       </div>
     </div>
 
-    <div class="pub-item">
+    <div class="pub-item" id="pub-facial-hair">
       <div class="pub-thumb"><img src="assets/facial-hair.png" alt=""></div>
       <div class="pub-content">
         <h3 class="pub-title">Logical Consistency and Greater Descriptive Power for Facial Hair Attribute Learning</h3>
@@ -185,7 +205,7 @@
       </div>
     </div>
 
-    <div class="pub-item">
+    <div class="pub-item" id="pub-balanced">
       <div class="pub-thumb"><img src="assets/balanced.png" alt=""></div>
       <div class="pub-content">
         <h3 class="pub-title">What Should Be Balanced in a &ldquo;Balanced&rdquo; Face Recognition Dataset?</h3>

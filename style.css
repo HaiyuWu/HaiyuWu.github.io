@@ -1,0 +1,352 @@
+/* ====== BASE RESET & TYPOGRAPHY ====== */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  color: #333;
+  background: #fff;
+}
+
+a {
+  color: #1a6fb5;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ====== PROFILE HEADER ====== */
+
+.profile {
+  padding: 60px 0 40px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.profile-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.profile-photo {
+  flex-shrink: 0;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e9ecef;
+}
+
+.profile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 4px;
+}
+
+.profile-info .title {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.profile-info .contact {
+  font-size: 0.95rem;
+  color: #777;
+  margin-bottom: 12px;
+}
+
+.profile-info .links {
+  font-size: 0.95rem;
+}
+
+.profile-info .links a {
+  font-weight: 600;
+}
+
+/* ====== SECTION HEADINGS ====== */
+
+section {
+  padding: 40px 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+section:last-of-type {
+  border-bottom: none;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1a6fb5;
+  display: inline-block;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* ====== ABOUT ME ====== */
+
+#about p {
+  margin-bottom: 16px;
+}
+
+.interests-education {
+  display: flex;
+  gap: 60px;
+  margin-top: 24px;
+}
+
+.interests ul,
+.education ul {
+  list-style: none;
+  margin-top: 10px;
+}
+
+.interests li {
+  padding: 3px 0;
+  position: relative;
+  padding-left: 18px;
+}
+
+.interests li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #1a6fb5;
+  font-weight: bold;
+}
+
+.education li {
+  padding: 5px 0;
+}
+
+.muted {
+  color: #777;
+  font-size: 0.92rem;
+}
+
+/* ====== AWARDS ====== */
+
+.award-list {
+  list-style: none;
+}
+
+.award-list li {
+  padding: 8px 0;
+  padding-left: 18px;
+  position: relative;
+}
+
+.award-list li::before {
+  content: "★";
+  position: absolute;
+  left: 0;
+  color: #d4a017;
+  font-size: 0.85rem;
+}
+
+/* ====== EXPERIENCE ====== */
+
+.experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.experience-item {
+  display: flex;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.experience-item:last-child {
+  border-bottom: none;
+}
+
+.exp-date {
+  flex-shrink: 0;
+  width: 170px;
+  font-size: 0.9rem;
+  color: #777;
+  padding-top: 2px;
+}
+
+.exp-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.exp-org {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.exp-location {
+  color: #999;
+  font-size: 0.88rem;
+}
+
+/* ====== PUBLICATIONS ====== */
+
+.pub-note {
+  margin-bottom: 24px;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.pub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pub-item {
+  padding: 18px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pub-item:last-child {
+  border-bottom: none;
+}
+
+.pub-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.pub-authors {
+  font-size: 0.92rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.pub-venue {
+  margin-bottom: 8px;
+}
+
+.venue-badge {
+  display: inline-block;
+  background: #eaf3fb;
+  color: #1a6fb5;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.pub-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pub-links a {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border: 1px solid #1a6fb5;
+  border-radius: 4px;
+  color: #1a6fb5;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pub-links a:hover {
+  background: #1a6fb5;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ====== FOOTER ====== */
+
+footer {
+  padding: 30px 0;
+  text-align: center;
+  font-size: 0.88rem;
+  color: #999;
+}
+
+footer a {
+  color: #999;
+}
+
+footer a:hover {
+  color: #1a6fb5;
+}
+
+/* ====== RESPONSIVE ====== */
+
+@media (max-width: 640px) {
+  body {
+    font-size: 16px;
+  }
+
+  .profile-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .profile-photo {
+    width: 140px;
+    height: 140px;
+  }
+
+  .interests-education {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .experience-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .exp-date {
+    width: auto;
+  }
+}

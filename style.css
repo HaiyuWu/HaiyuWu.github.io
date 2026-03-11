@@ -415,6 +415,13 @@ h3 i {
   text-transform: uppercase;
 }
 
+.pub-desc {
+  font-size: 0.97rem;
+  color: #e67e22;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
 .pub-links {
   display: flex;
   gap: 8px;

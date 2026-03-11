@@ -90,14 +90,16 @@ img {
 
 .profile-inner {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 44px;
+  text-align: center;
+  gap: 24px;
 }
 
 .profile-photo {
   flex-shrink: 0;
-  width: 180px;
-  height: 180px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(135deg, #e0ecf7, #d6dce5);
@@ -111,7 +113,7 @@ img {
 }
 
 .profile-info h1 {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #1a1a2e;
   margin-bottom: 6px;
@@ -119,13 +121,13 @@ img {
 }
 
 .profile-info .title {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   color: #555;
   margin-bottom: 10px;
 }
 
 .profile-info .contact {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #888;
   margin-bottom: 16px;
   font-family: monospace;
@@ -144,6 +146,7 @@ img {
   display: flex;
   gap: 20px;
   align-items: center;
+  justify-content: center;
 }
 
 .icon-links a {
@@ -327,7 +330,7 @@ h3 i {
 
 .exp-location {
   color: #aaa;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
 }
 
 .exp-desc {
@@ -420,7 +423,7 @@ h3 i {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
   padding: 5px 14px;
   border: 1.5px solid #1a6fb5;
@@ -442,7 +445,7 @@ h3 i {
 footer {
   padding: 36px 0 40px;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: #aaa;
 }
 

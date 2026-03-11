@@ -14,7 +14,7 @@ html {
 
 body {
   font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.7;
   color: #333;
   background: #fff;
@@ -97,7 +97,7 @@ img {
 
 .icon-links {
   display: flex;
-  gap: 16px;
+  gap: 28px;
   align-items: center;
 }
 

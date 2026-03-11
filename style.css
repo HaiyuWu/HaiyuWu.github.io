@@ -318,7 +318,7 @@ h3 i {
   border-radius: 10px;
   margin: 0 -16px;
   transition: background 0.2s;
-  scroll-margin-top: 70px;
+  scroll-margin-top: 100px;
 }
 
 .experience-item:hover {
@@ -399,7 +399,7 @@ h3 i {
   border-radius: 10px;
   transition: background 0.2s, box-shadow 0.2s;
   margin: 0 -16px;
-  scroll-margin-top: 70px;
+  scroll-margin-top: 100px;
 }
 
 .pub-item:hover {

@@ -112,6 +112,38 @@ img {
   text-decoration: none;
 }
 
+/* ====== NAVIGATION TABS ====== */
+
+.tab-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.tab-inner {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.tab-link {
+  padding: 6px 18px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab-link:hover {
+  background: #eaf3fb;
+  color: #1a6fb5;
+  text-decoration: none;
+}
+
 /* ====== SECTION HEADINGS ====== */
 
 section {

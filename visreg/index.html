@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VISReg: Variance-Invariance-Sketching Regularization for JEPA training</title>
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://haiyuwu.github.io/visreg/">
+
+    <!-- Google Scholar meta tags -->
+    <meta name="citation_title" content="VISReg: Variance-Invariance-Sketching Regularization for JEPA training">
+    <meta name="citation_author" content="Wu, Haiyu">
+    <meta name="citation_author" content="Balestriero, Randall">
+    <!-- <meta name="citation_author" content="LeCun, Yann"> (pending author confirmation) -->
+    <meta name="citation_author" content="Levine, Morgan">
+    <meta name="citation_publication_date" content="2026">
+    <meta name="citation_conference_title" content="ICML 2026">
+    <meta name="citation_arxiv_id" content="">
+    <meta name="citation_pdf_url" content="">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ScholarlyArticle",
+      "headline": "VISReg: Variance-Invariance-Sketching Regularization for JEPA training",
+      "author": [
+        {"@type": "Person", "name": "Haiyu Wu", "affiliation": {"@type": "Organization", "name": "Altos Labs"}},
+        {"@type": "Person", "name": "Randall Balestriero", "affiliation": {"@type": "Organization", "name": "Brown University"}},
+        {"@type": "Person", "name": "Morgan Levine", "affiliation": {"@type": "Organization", "name": "Altos Labs"}}
+      ],
+      "datePublished": "2026",
+      "url": "https://haiyuwu.github.io/visreg/",
+      "sameAs": ""
+    }
+    </script>
+
+    <!-- Open Graph -->
+    <meta property="og:url" content="https://haiyuwu.github.io/visreg/">
+    <meta property="og:title" content="VISReg: Variance-Invariance-Sketching Regularization for JEPA training">
+    <meta property="og:description" content="A heuristic-free self-supervised learning method that achieves SOTA out-of-distribution performance by decoupling embedding regularization into scale and shape.">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="VISReg: Variance-Invariance-Sketching Regularization for JEPA training">
+    <meta name="twitter:description" content="A heuristic-free self-supervised learning method that achieves SOTA out-of-distribution performance by decoupling embedding regularization into scale and shape.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+    <!-- MathJax -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Page styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sticky Table of Contents (desktop only, appears on scroll) -->
+    <nav class="toc-container" id="toc">
+        <h4>Contents</h4>
+        <ul>
+            <li><a href="#motivation">Motivation</a></li>
+            <li><a href="#method">Method</a></li>
+            <li><a href="#results">Results</a></li>
+            <li><a href="#conclusion">Conclusion</a></li>
+        </ul>
+    </nav>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="../index.html" class="nav-back">
+                <i class="fas fa-arrow-left"></i>
+                Haiyu Wu
+            </a>
+            <div class="nav-links">
+                <!-- Future paper links go here -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header / Hero -->
+    <div class="header-wrapper">
+        <div class="central-header">
+            <!-- Title -->
+            <div class="title-section">
+                <h1>VISReg</h1>
+                <h2>A scaling friendly method with a better generalizability</h2>
+                <span class="venue-badge">arXiv</span>
+            </div>
+
+            <!-- Authors -->
+            <div class="authors">
+                <a href="https://haiyuwu.github.io/" target="_blank">Haiyu Wu</a><sup>1</sup> &emsp;
+                <a href="https://randallbalestriero.github.io/" target="_blank">Randall Balestriero</a><sup>2</sup> &emsp;
+                <!-- <a href="https://yann.lecun.com/" target="_blank">Yann LeCun</a><sup>3</sup> &emsp; (pending author confirmation) -->
+                <a href="https://scholar.google.com/citations?user=Kj5SyMgAAAAJ" target="_blank">Morgan Levine</a><sup>1</sup>
+                <div class="affiliations">
+                    <sup>1</sup>Altos Labs &emsp; <sup>2</sup>Brown University <!-- &emsp; <sup>3</sup>New York University (pending author confirmation) -->
+                </div>
+            </div>
+
+            <!-- TL;DR -->
+            <div class="tldr-section">
+                <p><span class="tldr-label">TL;DR:</span> We propose <strong>VISReg</strong> (Variance-Invariance-Sketching Regularization), a novel method that prevents embeddings from collapse while learning good representations. We systematically evaluate its ability in scaling efficiency, low-quality datasets, in-domain and OOD performance, dense instance prediction, and generation. VISReg has the <strong>best OOD performance</strong> at ImageNet-1K level and achieves similar OOD performance as DINOv2 with only <strong>0.1x training data</strong>.</p>
+            </div>
+
+            <!-- Key points + Hero image -->
+            <div class="hero-section">
+                <div class="key-points">
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F6E1;</span>
+                        <div class="key-point-text"><strong>Heuristic-Free Training</strong>: Stable self-supervised learning without EMA, stop-gradient, teacher-student, etc.</div>
+                    </div>
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F4AA;</span>
+                        <div class="key-point-text"><strong>Strong collapse prevention</strong>: Providing stronger gradients at collapse stage.</div>
+                    </div>
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F30D;</span>
+                        <div class="key-point-text"><strong>Best OOD Generalization</strong>: SOTA on 6 diverse out-of-distribution datasets, outperforming all methods.</div>
+                    </div>
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F680;</span>
+                        <div class="key-point-text"><strong>Scales Efficiently</strong>: Linear complexity to scaling factors with GPU-distributable slices, friendly to large-scale training.</div>
+                    </div>
+
+                    <div class="button-row">
+                        <a href="#" class="button" onclick="return false;">
+                            <i class="ai ai-arxiv"></i> <span>arXiv</span>
+                        </a>
+                        <a href="https://github.com/HaiyuWu/visreg" class="button" target="_blank">
+                            <i class="fab fa-github"></i> <span>Code</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-media">
+                    <a href="assets/promote.mp4" target="_blank">
+                        <video autoplay loop muted playsinline style="width: 100%; border-radius: 6px; cursor: pointer;">
+                            <source src="assets/promote.mp4" type="video/mp4">
+                        </video>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <article class="content">
+
+        <!-- Key Findings -->
+        <div class="key-findings">
+            <h4 class="key-findings-title">Key Findings</h4>
+            <div class="key-finding">
+                <span class="key-finding-number">1</span>
+                <p class="key-finding-text"><strong>Robust to low-quality datasets:</strong> Methods grounded in the Cram&eacute;r&ndash;Wold theorem are stable to low-quality datasets (e.g., long-tailed, sparse) and the slices/projections for regularization loss can be naturally increased in distributed training which ensures training stability.</p>
+            </div>
+            <div class="key-finding">
+                <span class="key-finding-number">2</span>
+                <p class="key-finding-text"><strong>Best OOD performance:</strong> VISReg has the best OOD linear probe accuracy at ImageNet-1K level. At a larger scale, VISReg trained on ImageNet-22K (<em>14M images</em>) is able to achieve similar average accuracy to DINOv2 trained on LVD-142M (<em>142M images</em>) on OOD benchmarks.</p>
+            </div>
+            <div class="key-finding">
+                <span class="key-finding-number">3</span>
+                <p class="key-finding-text"><strong>Good downstream applications:</strong> VISReg has on-par or better performance than DINOv1 on transfer learning, dense instance prediction, and generation guidance.</p>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- ============ MOTIVATION ============ -->
+        <section id="motivation">
+            <h2>Why Decoupled Regularization?</h2>
+
+            <p>Self-supervised learning methods like DINO, iBOT, and I-JEPA rely on heavy heuristics &mdash; EMA updates, teacher-student architectures, stop-gradient, frozen layers &mdash; to prevent <em>embedding collapse</em>. LeJEPA showed that regularizing the embedding space to an isotropic Gaussian can replace these heuristics entirely. However, its regularizer (SIGReg) has a critical weakness: <strong>its gradient vanishes precisely when the model needs it most &mdash; at collapse.</strong></p>
+
+            <figure>
+                <img src="assets/collapse_gradient.png" alt="Gradient magnitude comparison under embedding collapse for VISReg, SIGReg, Barlow Twins, VICReg, and SWD">
+                <figcaption><strong>Figure 2.</strong> Embedding collapse prevention. We simulate the gradient \(\|\nabla\mathcal{L}\|\) of regularization methods under different collapse stages. VISReg maintains strong gradients at collapse, while SIGReg&rsquo;s gradient vanishes.</figcaption>
+            </figure>
+
+            <p>This motivates our approach: decouple the regularization into independent scale (<strong>variance</strong>) and shape (<strong>sketching</strong> distribution geometry) components. By operating on these separately, VISReg is more robust to collapse, more efficient in high dimensions, and more resilient to low-quality datasets.</p>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ METHOD ============ -->
+        <section id="method">
+            <h2>VISReg: Variance-Invariance-Sketching Regularization</h2>
+
+            <p>VISReg regulates the embedding space through three complementary objectives:</p>
+
+            <h3>Scale Regularization</h3>
+            <p>We constrain the per-dimension variance to prevent magnitude collapse:
+            \[\mathcal{L}_{\text{scale}} = \frac{1}{D}\sum_{j=1}^{D}(1 - \sigma_j(\hat{Z}))^2\]
+            The gradient approaches a <em>constant</em> when the model collapses, ensuring stable recovery.</p>
+
+            <h3>Shape Regularization</h3>
+            <p>After normalizing out scale, we align the distribution geometry to the isotropic Gaussian using the Sliced Wasserstein Distance (SWD), grounded in the Cram&eacute;r-Wold theorem:
+            \[\mathcal{L}_{\text{shape}} = \frac{1}{K}\sum_{k=1}^{K}\left\|\text{sort}(\tilde{Z}w_k) - q_N\right\|_2^2\]
+            where \(q_N\) are the Gaussian quantiles and \(w_k\) are random projection directions.</p>
+
+            <h3>Combined Objective</h3>
+            <p>\[\mathcal{L}_{\text{Reg}} = \mathcal{L}_{\text{scale}} + \mathcal{L}_{\text{shape}} + \mathcal{L}_{\text{center}}\]
+            Combined with an Euclidean invariant prediction loss, the full VISReg objective is:
+            \[\mathcal{L}_{\text{VISReg}} = (1-\lambda)\mathcal{L}_{\text{pred}} + \lambda\mathcal{L}_{\text{Reg}}\]</p>
+
+            <div class="code-title">Algorithm 1. regularization part of VISReg in PyTorch &mdash; ~15 lines of code</div>
+            <div class="code-block"><pre><code><span class="keyword">def</span> <span class="function">visreg</span>(z, K=<span class="number">64</span>):
+    <span class="comment"># 1. Center loss</span>
+    mu = z.mean(dim=<span class="number">0</span>)
+    L_center = mu.pow(<span class="number">2</span>).mean()
+
+    <span class="comment"># 2. Scale loss</span>
+    z_cent = z - mu
+    std = z_cent.std(dim=<span class="number">0</span>, unbiased=<span class="keyword">False</span>)
+    L_scale = (<span class="number">1.0</span> - std).pow(<span class="number">2</span>).mean()
+
+    <span class="comment"># 3. Shape loss: Sliced Wasserstein Distance</span>
+    z_norm = z_cent / (std.detach())
+    W = torch.randn(D, K)
+    W /= W.norm(p=<span class="number">2</span>, dim=<span class="number">0</span>)
+    p_sorted = torch.sort(z_norm @ W, dim=<span class="number">0</span>).values
+    u = torch.arange(<span class="number">1</span>, N+<span class="number">1</span>) / (N+<span class="number">1</span>)
+    target = Normal(<span class="number">0</span>, <span class="number">1</span>).icdf(u)
+    L_shape = (p_sorted - target).pow(<span class="number">2</span>).mean()
+
+    <span class="keyword">return</span> L_scale + L_shape + L_center</code></pre>
+            </div>
+
+            <h3>Scaling Analysis</h3>
+
+            <p>VISReg has complexity \(\mathcal{O}(NDK)\), linear in all scaling factors. Crucially, the \(K\) random slices can be <strong>distributed across GPUs</strong> &mdash; generating \(K/M\) slices per GPU on \(M\) GPUs yields the same accuracy as \(K\) slices on one GPU. This keeps \(K\) constant during scaling.</p>
+
+            <figure>
+                <img src="assets/gpu_effect.png" alt="Linear probe accuracy scaling with number of GPUs at fixed K and D">
+                <figcaption><strong>Figure 6.</strong> Linear probe accuracy when scaling GPUs with fixed \(K\) and \(D\). Scaling GPUs compensates for insufficient \(K=\frac{1}{4}D\): with 8&times; more GPUs, accuracy matches the \(K=2D\) target, making constant \(K\) feasible at scale.</figcaption>
+            </figure>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ RESULTS ============ -->
+        <section id="results">
+            <h2>Results</h2>
+
+            <h3>Out-of-Distribution Performance</h3>
+            <p>We evaluate on 6 OOD datasets spanning medical (ChestXRay, RetinaMNIST, OrganAMNIST), space (Galaxy10), aerial (AID), and texture (DTD) domains. VISReg achieves the <strong>best average OOD accuracy</strong> across all methods and backbone scales.</p>
+
+            <figure class="fig-wide">
+                <img src="assets/avg_accuracy_fig1.png" alt="Average OOD accuracy comparison: VISReg vs iBOT, DINO, MoCoV3, I-JEPA, MAE, data2vec">
+                <figcaption><strong>Figure 4.</strong> Average OOD linear probe accuracy. VISReg outperforms all methods, including those with heuristics and larger backbones.</figcaption>
+            </figure>
+
+            <h3>10x Data Efficiency</h3>
+            <p>When pre-trained on ImageNet-22K, VISReg with ViT-L/14 achieves <strong>comparable OOD performance to DINOv2</strong>, which was pre-trained on the 10&times; larger LVD-142M dataset. This demonstrates the strong generality of representations learned by VISReg.</p>
+
+            <figure class="fig-small">
+                <img src="assets/avg_accuracy_fig2.png" alt="VISReg-IN22K vs DINOv2-LVD142M average OOD accuracy comparison">
+                <figcaption><strong>Figure 5.</strong> VISReg pre-trained on ImageNet-22K matches DINOv2 pre-trained on LVD-142M (10&times; more data) on OOD benchmarks.</figcaption>
+            </figure>
+
+            <h3>Transfer Learning</h3>
+            <p>Despite having lower linear probe accuracy on in-domain datasets than DINO, VISReg <strong>outperforms DINO after fine-tuning</strong> on all tested datasets (CIFAR-10, CIFAR-100, Flowers, ImageNet-1K, Galaxy10), indicating stronger transferable representations.</p>
+
+            <figure class="fig-wide">
+                <img src="assets/table_histplot.png" alt="Transfer learning accuracy: VISReg vs DINO vs Supervised on CIFAR10, CIFAR100, Flowers, ImageNet1K, Galaxy10">
+                <figcaption><strong>Figure 6.</strong> Transfer learning comparison. VISReg outperforms both DINO and supervised pre-training after fine-tuning on all tested datasets.</figcaption>
+            </figure>
+
+            <h3>Dense Prediction &amp; Generation Guidance</h3>
+
+            <figure>
+                <img src="assets/seg_histplot.png" alt="Linear segmentation on ADE20K: MoCoV3, DINO, data2vec, MAE, VISReg" style="max-width: 560px; margin: 0 auto;">
+                <figcaption><strong>Figure 7.</strong> Linear segmentation on ADE20K. Without heuristics, VISReg achieves competitive mIoU, second only to MoCoV3.</figcaption>
+            </figure>
+
+            <figure>
+                <img src="assets/gen_histplot.png" alt="Generation guidance via iREPA: DINO vs VISReg on IS, gFID, Precision, Recall">
+                <figcaption><strong>Figure 8.</strong> Image generation with SiT-B/2 guided by VISReg vs DINO features. VISReg provides better guidance across all metrics (lower gFID, higher Precision and Recall).</figcaption>
+            </figure>
+
+            <h3>Robustness to Low-Quality Data</h3>
+            <p>On long-tailed (ImageNet-LT) and low-rank (Galaxy10) datasets, VISReg successfully prevents collapse and learns meaningful embeddings, while DINO fails without careful hyperparameter tuning.</p>
+
+            <!-- Table: ImageNet-LT -->
+            <div class="table-container">
+                <p class="table-caption"><strong>Table 1.</strong> Linear probe accuracy on ImageNet-LT. ViT-S/8 trained for 400 epochs from scratch. Our VISReg method outperforms all methods at all levels. DINO fails to learn meaningful embeddings. * means increasing the weight of shape loss.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Overall</th>
+                            <th>Many</th>
+                            <th>Medium</th>
+                            <th>Few</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SWD</td>
+                            <td>31.85</td>
+                            <td>51.54</td>
+                            <td>22.70</td>
+                            <td>8.36</td>
+                        </tr>
+                        <tr>
+                            <td>SIGReg</td>
+                            <td>32.00</td>
+                            <td>51.86</td>
+                            <td>22.88</td>
+                            <td>7.92</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>VISReg</td>
+                            <td>32.11</td>
+                            <td>51.55</td>
+                            <td>23.19</td>
+                            <td>8.52</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>VISReg*</td>
+                            <td><strong>35.14</strong></td>
+                            <td><strong>54.49</strong></td>
+                            <td><strong>26.87</strong></td>
+                            <td><strong>9.40</strong></td>
+                        </tr>
+                        <tr>
+                            <td>VICReg</td>
+                            <td>33.08</td>
+                            <td>52.29</td>
+                            <td>24.63</td>
+                            <td>8.54</td>
+                        </tr>
+                        <tr class="fail-row">
+                            <td>DINO</td>
+                            <td class="fail">5.13</td>
+                            <td class="fail">12.22</td>
+                            <td class="fail">0.82</td>
+                            <td class="fail">0.24</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table: Galaxy10 -->
+            <div class="table-container">
+                <p class="table-caption"><strong>Table 2.</strong> In-domain linear probe accuracy on Galaxy10. The model is trained from scratch to test the performance of methods on the low-rank task. SIGReg, SWD, and VISReg successfully prevent the training from collapsing while obtaining a good linear probe accuracy, whereas DINO struggles to learn meaningful features. * means increasing the weight of shape loss.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>SWD</th>
+                            <th>SIGReg</th>
+                            <th class="highlight-col">VISReg</th>
+                            <th class="highlight-col">VISReg*</th>
+                            <th>VICReg</th>
+                            <th>DINO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Acc.</td>
+                            <td>80.60</td>
+                            <td>80.50</td>
+                            <td class="highlight-col">80.51</td>
+                            <td class="highlight-col"><strong>80.76</strong></td>
+                            <td>79.93</td>
+                            <td class="fail">73.49</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ CONCLUSION ============ -->
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+
+            <p>VISReg demonstrates that <strong>decoupling embedding regularization into scale and shape</strong> yields a self-supervised method that is more stable, more efficient, and produces more generalizable representations than existing approaches. Without any training heuristics, VISReg achieves SOTA OOD performance and strong transfer learning capabilities, pointing toward a promising direction for foundation model training.</p>
+        </section>
+
+        <!-- BibTeX -->
+        <div class="bibtex-section">
+            <h3>Citation</h3>
+            <div class="bibtex-container">
+                <button class="copy-btn" id="copy-bibtex-btn" onclick="copyBibtex()">Copy</button>
+                <pre id="bibtex-text">@inproceedings{wu2026visreg,
+  title     = {VISReg: Variance-Invariance-Sketching Regularization for JEPA training},
+  author    = {Wu, Haiyu and Balestriero, Randall and <!--LeCun, Yann and -->Levine, Morgan},
+  booktitle = {arXiv},
+  year      = {2026}
+}</pre>
+            </div>
+        </div>
+
+    </article>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <p>&copy; 2026 Haiyu Wu. <a href="../index.html">Back to homepage</a>.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+    // === BibTeX copy ===
+    function copyBibtex() {
+        const text = document.getElementById('bibtex-text').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copy-bibtex-btn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    }
+
+    // === Sticky TOC: show on scroll, highlight active section ===
+    (function() {
+        const toc = document.getElementById('toc');
+        const header = document.querySelector('.header-wrapper');
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = toc ? toc.querySelectorAll('a') : [];
+
+        function updateTOC() {
+            // Show/hide TOC
+            if (toc && header) {
+                const headerBottom = header.getBoundingClientRect().bottom;
+                toc.classList.toggle('visible', headerBottom < 0);
+            }
+
+            // Highlight active section
+            let current = '';
+            sections.forEach(section => {
+                const top = section.getBoundingClientRect().top;
+                if (top < 200) current = section.id;
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+            });
+        }
+
+        window.addEventListener('scroll', updateTOC, { passive: true });
+        updateTOC();
+    })();
+
+    // === Smooth scroll for TOC links ===
+    document.querySelectorAll('.toc-container a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const navHeight = document.querySelector('.top-nav').offsetHeight;
+                const y = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>

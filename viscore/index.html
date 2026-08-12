@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VIScore: Diagnosing Planning-Relevant Quality in Latent World Models</title>
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://haiyuwu.github.io/viscore/">
+
+    <!-- Google Scholar meta tags -->
+    <meta name="citation_title" content="VIScore: Diagnosing Planning-Relevant Quality in Latent World Models">
+    <meta name="citation_author" content="Wu, Haiyu">
+    <meta name="citation_author" content="Balestriero, Randall">
+    <meta name="citation_author" content="Levine, Morgan">
+    <meta name="citation_publication_date" content="2026">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ScholarlyArticle",
+      "headline": "VIScore: Diagnosing Planning-Relevant Quality in Latent World Models",
+      "author": [
+        {"@type": "Person", "name": "Haiyu Wu", "affiliation": {"@type": "Organization", "name": "Altos Labs"}},
+        {"@type": "Person", "name": "Randall Balestriero", "affiliation": {"@type": "Organization", "name": "Brown University"}},
+        {"@type": "Person", "name": "Morgan Levine", "affiliation": {"@type": "Organization", "name": "Altos Labs"}}
+      ],
+      "datePublished": "2026",
+      "url": "https://haiyuwu.github.io/viscore/"
+    }
+    </script>
+
+    <!-- Open Graph -->
+    <meta property="og:url" content="https://haiyuwu.github.io/viscore/">
+    <meta property="og:title" content="VIScore: Diagnosing Planning-Relevant Quality in Latent World Models">
+    <meta property="og:description" content="An interpretable, single-checkpoint diagnostic of latent world-model quality for planning: veracity, influence, and sobriety, measured offline in seconds instead of hours of model-predictive control.">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="VIScore: Diagnosing Planning-Relevant Quality in Latent World Models">
+    <meta name="twitter:description" content="An interpretable, single-checkpoint diagnostic of latent world-model quality for planning: veracity, influence, and sobriety, measured offline in seconds instead of hours of model-predictive control.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+    <!-- MathJax -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Page styles -->
+    <link rel="stylesheet" href="style.css">
+    <meta name="citation_arxiv_id" content="2608.11174">
+    <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2608.11174">
+</head>
+<body>
+
+    <!-- Sticky Table of Contents (desktop only, appears on scroll) -->
+    <nav class="toc-container" id="toc">
+        <h4>Contents</h4>
+        <ul>
+            <li><a href="#regularization">Regularization</a></li>
+                    <li><a href="#motivation">Motivation</a></li>
+            <li><a href="#method">Method</a></li>
+            <li><a href="#results">Results</a></li>
+            <li><a href="#limitations">Limitations</a></li>
+            <li><a href="#conclusion">Conclusion</a></li>
+        </ul>
+    </nav>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="../index.html" class="nav-back">
+                <i class="fas fa-arrow-left"></i>
+                Haiyu Wu
+            </a>
+            <div class="nav-links">
+                <!-- Future paper links go here -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header / Hero -->
+    <div class="header-wrapper">
+        <div class="central-header">
+            <!-- Title -->
+            <div class="title-section">
+                <h1>VIScore</h1>
+                <h2>Diagnosing planning-relevant quality in latent world models</h2>
+                <span class="venue-badge">arXiv</span>
+            </div>
+
+            <!-- Authors -->
+            <div class="authors">
+                <a href="https://haiyuwu.github.io/" target="_blank">Haiyu Wu</a><sup>1</sup> &emsp;
+                <a href="https://randallbalestriero.github.io/" target="_blank">Randall Balestriero</a><sup>2</sup> &emsp;
+                <a href="https://scholar.google.com/citations?user=Kj5SyMgAAAAJ" target="_blank">Morgan Levine</a><sup>1</sup>
+                <div class="affiliations">
+                    <sup>1</sup>Altos Labs &emsp; <sup>2</sup>Brown University
+                </div>
+            </div>
+
+            <!-- TL;DR -->
+            <div class="tldr-section">
+                <p><span class="tldr-label">TL;DR:</span> <strong>Four stages</strong> decide whether a latent world model plans successfully: a <strong>vision encoder</strong> turning pixels into latents, a <strong>predictor</strong> rolling them forward, a <strong>planner</strong> searching actions, and the <strong>task tolerance</strong> that grades the result. Existing diagnostics stop at the first two &mdash; straightness reads latent geometry, a physical-state probe reads what the encoder retains, empowerment reads action-to-future capacity &mdash; so <strong>nothing measures the planner, or the tolerance it is graded against</strong>. <strong>VIScore</strong> covers all four as a product of three interpretable factors, <strong>veracity &times; influence &times; sobriety</strong>. It correlates strongly with planning success and is the best-calibrated metric across both planners and datasets.</p>
+            </div>
+
+            <!-- Key points + Hero image -->
+            <div class="hero-section">
+                <div class="key-points">
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F50D;</span>
+                        <div class="key-point-text"><strong>Covers all four stages</strong>: encoder, predictor, planner, and the task tolerance that grades the result &mdash; existing metrics reach only the first two.</div>
+                    </div>
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F525;</span>
+                        <div class="key-point-text"><strong>High correlation with success</strong>: pooled &rho; <strong>+0.91</strong> on 103 held-out checkpoints, where raw empowerment matches it inside every task but falls to +0.49 across them.</div>
+                    </div>
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F4AA;</span>
+                        <div class="key-point-text"><strong>Best calibration across planners and datasets</strong>: the only metric whose cross-task calibration error stays below the constant-predictor reference on every pool.</div>
+                    </div>
+                    <div class="key-point">
+                        <span class="key-point-icon">&#x1F680;</span>
+                        <div class="key-point-text"><strong>20&times; faster than the real evaluation</strong>: ~7&nbsp;s per checkpoint, no environment, no planner rollouts, no success labels.</div>
+                    </div>
+
+                    <div class="button-row">
+                        <a href="https://github.com/HaiyuWu/viscore" class="button" target="_blank">
+                            <i class="fab fa-github"></i> <span>Code</span>
+                        </a>
+                        <a href="https://huggingface.co/BooBooWu/viscore" class="button" target="_blank">
+                            <i class="fas fa-cube"></i> <span>Models</span>
+                        </a>
+                        <a href="https://huggingface.co/datasets/BooBooWu/viscore" class="button" target="_blank">
+                            <i class="fas fa-database"></i> <span>Data</span>
+                        </a>
+                        <a href="https://arxiv.org/abs/2608.11174" class="button" target="_blank">
+                            <i class="ai ai-arxiv"></i> <span>arXiv</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-media">
+                    <video autoplay loop muted playsinline controls preload="metadata"
+                           style="width: 100%; border-radius: 6px;">
+                        <source src="assets/promote.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <article class="content">
+
+        <!-- Key Findings -->
+        <div class="key-findings">
+            <h4 class="key-findings-title">Key Findings</h4>
+            <div class="key-finding">
+                <span class="key-finding-number">1</span>
+                <p class="key-finding-text"><strong>Accuracy of distribution matching, not flexibility, is what moves planning.</strong> SIGReg and VISReg target the same isotropic Gaussian. Reweighting VISReg's center/scale/shape terms is what helps self-supervised learning &mdash; \(32.0\to35.1\) on ImageNet-LT linear probing &mdash; and it buys nothing for planning. A finer approximation of the same target does: out-of-distribution success rises \(77.4\to82.0\) points while in-distribution success stays flat.</p>
+            </div>
+            <div class="key-finding">
+                <span class="key-finding-number">2</span>
+                <p class="key-finding-text"><strong>VIScore reads three aspects no previous metric measures.</strong> Given the encoded feature, it quantifies the <em>reachability</em> and <em>capacity</em> of the predictor, and the <em>hallucination</em> of the search-based planner. Straightness, physical-state probing and empowerment all read the encoded latent alone, so none of them sees the search that will actually run or how much error the task forgives.</p>
+            </div>
+            <div class="key-finding">
+                <span class="key-finding-number">3</span>
+                <p class="key-finding-text"><strong>It explains the success rate, and it is the only metric calibrated below a constant.</strong> Spearman \(\rho\) above \(+0.75\) on the cross-task pool against \(+0.49\) for raw empowerment, and the only metric whose calibration error stays under the constant-fit reference in every testing scenario &mdash; which is what makes a reading usable on a task that has no success labels yet.</p>
+            </div>
+            
+            
+        </div>
+
+        <!-- ============ REGULARIZATION ============ -->
+        <section id="regularization">
+            <h2>Does a better latent distribution give better planning?</h2>
+
+            <p>End-to-end latent world models need an explicit mechanism against collapse, and the usual answer is to regularize the embedding towards an isotropic Gaussian. Whether that property <em>buys planning success</em> has not been tested, so we test it with a controlled substitution: keep the architecture, the data and the predictor loss fixed, and replace only the regularizer.</p>
+
+            <p><strong>SIGReg</strong> matches random one-dimensional projections of the embedding to a standard Gaussian through an Epps&ndash;Pulley statistic. <strong>VISReg</strong> targets the same prior but factorizes it into independently weighted <em>center</em>, <em>scale</em> and <em>shape</em> terms, which separates two axes: how the constraint is decomposed, and how accurately the distribution is actually matched.</p>
+
+            <p>\[\mathcal{L}_{\mathrm{center}}=\tfrac{1}{D}\|\mu\|_2^2,\qquad \mathcal{L}_{\mathrm{scale}}=\tfrac{1}{D}\sum_j\left(1-\sigma_j\right)^2,\qquad \mathcal{L}_{\mathrm{shape}}=\tfrac{1}{KB}\sum_{k}\left\|\operatorname{sort}(\widetilde{Z}w_k)-\mathbf{q}_{\mathcal{N}}\right\|_2^2\]</p>
+
+            <p><strong>The two axes come apart.</strong> Component flexibility is what helps self-supervised learning &mdash; reweighting center/scale/shape to \(\{0.5,0.5,2\}\) lifts ImageNet-LT linear-probe accuracy from \(32.0\) to \(35.1\), most of it on the rare classes. It buys nothing for planning. What does move planning is the second axis: a larger batch, which makes the shape term a finer approximation of the target, raises out-of-distribution success from \(77.4\) to \(82.0\) points while in-distribution success stays flat.</p>
+
+            <div class="table-container">
+                <p class="table-caption"><strong>Table 1.</strong> Out-of-distribution PushObj success (mean over shapes, three evaluation seeds). Flexibility is free; matching accuracy is not.</p>
+                <table>
+                    <thead>
+                        <tr><th>Objective</th><th>d = 25</th><th>d = 50</th><th>d = 75</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>LeWM (SIGReg, B = 128)</td><td>79.1</td><td>61.8</td><td>44.3</td></tr>
+                        <tr><td>VIS-WM (VISReg, B = 128)</td><td>77.4</td><td>59.7</td><td>41.8</td></tr>
+                        <tr><td>VIS-WM (VISReg, B = 256)</td><td>82.0</td><td>62.2</td><td>44.3</td></tr>
+                        <tr class="highlight-row"><td><strong>VIS-WM (VISReg, B = 512)</strong></td><td><strong>82.0</strong></td><td>62.0</td><td><strong>45.6</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Two things follow. A latent-space property that is demonstrably good in one setting does not transfer to planning by itself, so <em>planning quality has to be measured on the planning pipeline</em> &mdash; which is what the rest of this page is about. And single-seed evaluation is not enough to see any of this: under one seed VIS-WM appears to beat LeWM outright, and under three fresh seeds the two are indistinguishable in distribution.</p>
+            <p><strong>Where the advantage does and does not hold.</strong> On six unseen object shapes the apparent gain survives only at the shortest horizon, and the matched-batch control above traces it to batch size acting as a hidden regularization-strength knob for VISReg rather than to the objective itself. Under the conventional single-seed protocol VIS-WM looks ahead of LeWorldModel; under three fresh seeds the two objectives become indistinguishable &mdash; a finding about the protocol rather than about either objective.</p>
+
+            <figure class="fig-wide">
+                <img src="assets/ood_shapes.png" alt="Seven columns of PushT-style scenes (T train, L, Z, plus, I, small T, square) at three timesteps, showing that replaying the same action sequence produces different trajectories once the object geometry changes.">
+                <figcaption><strong>Figure 1.</strong> The out-of-distribution PushObj shapes. Replaying the <em>same</em> expert actions yields different trajectories because object geometry changes the dynamics. Note that the goal marker (green) renders in the substituted shape &mdash; one of three reasons absolute success levels on these files are not portable, while comparisons between methods on the same file remain fair.</figcaption>
+            </figure>
+
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ MOTIVATION ============ -->
+        <section id="motivation">
+            <h2>Why not just run the planner?</h2>
+
+            <p>Selecting a latent world model means training it, then running model-predictive control for 50 episodes and reading a success rate. That is expensive, it is noisy at a single evaluation seed, and it answers only one question: <em>whether</em> this checkpoint plans well. It never says <strong>which part is broken</strong> &mdash; the encoder, the predictor, or the interaction between the predictor and the search.</p>
+
+            <p>The diagnostics in common use do not fill the gap. <em>Straightness</em> of latent trajectories changes sign across tasks (\(+0.51/+0.13/-0.67\) on PushT/Reacher/Two-Room), so it cannot be read as quality. A <em>physical-state probe</em> measures perception, which is necessary but far from sufficient. <em>Latent empowerment</em> is strongly associated with success within a task, but it is measured in nats whose meaning does not transfer: pooled across tasks it collapses, and on converged checkpoints it actively mis-orders them.</p>
+
+            <h3>The problem with current metrics</h3>
+
+            <p>A single planning attempt passes through four stages, and it fails if any one of them fails: the <strong>vision encoder</strong> turns pixels into \(z_t\); the <strong>predictor</strong> rolls \(z\) forward under a candidate action sequence; the <strong>planner</strong> searches that space for a sequence whose imagined outcome looks good; and the <strong>task tolerance</strong> grades whether the state actually reached counts as success. A diagnostic that measures a subset cannot tell a healthy model from one that will fail, because the stage it does not look at is exactly where the failure may sit.</p>
+
+            <div class="table-container">
+                <p class="table-caption"><strong>Table 2.</strong> What each diagnostic reads. Every existing metric stops at the first two stages: none of them looks at the search that will actually be run, or at how much error the task forgives.</p>
+                <table>
+                    <thead>
+                        <tr><th>Diagnostic</th><th>encoder</th><th>predictor</th><th>planner</th><th>task tolerance</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Straightness &mdash; geometry of latent trajectories</td><td>&#10003;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+                        <tr><td>Physical-state probe &mdash; is the state decodable from \(z_t\)?</td><td>&#10003;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+                        <tr><td>Empowerment &mdash; capacity from actions to futures</td><td>&#10003;</td><td>&#10003;</td><td>&mdash;</td><td>&mdash;</td></tr>
+                        <tr class="highlight-row"><td><strong>VIScore</strong></td><td><strong>&#10003;</strong></td><td><strong>&#10003;</strong></td><td><strong>&#10003;</strong></td><td><strong>&#10003;</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>The two uncovered stages are not details. A predictor accurate to a fixed latent distance is harmless for coarse navigation and fatal for precise manipulation &mdash; that is the tolerance stage. And a latent landscape can be informative yet still contain optima that the search will prefer over the action that actually succeeds &mdash; that is the planner stage. Both are measurable, and measuring them is what separates VIScore from the three diagnostics above.</p>
+
+            
+
+                        <p>What is missing is a reading that is <strong>anchored to the task</strong>. The same absolute latent error is harmless for coarse navigation and fatal for manipulation, so a diagnostic has to be expressed relative to the ball the environment&rsquo;s own success criterion grades on.</p>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ METHOD ============ -->
+        <section id="method">
+            <h2>VIScore: Veracity &times; Influence &times; Sobriety</h2>
+
+            <p>Predictor-based planning needs three conditions to hold at once: the predictor must roll the latent state forward accurately <em>enough for the task</em>; different actions must produce sufficiently distinguishable futures; and the planner must not be able to fabricate candidates it merely believes are better than the data&rsquo;s own actions. We call these <strong>veracity</strong>, <strong>influence</strong> and <strong>sobriety</strong>, and multiply them because they are <em>prerequisites</em> &mdash; the weakest unmet one dominates:</p>
+
+            <p>\[\mathrm{VIS} \;=\; \underbrace{\operatorname{erf}\!\left(\frac{d_{\mathrm{tol}}/2}{\sqrt{2}\,\sigma_{\mathrm{roll}}}\right)}_{\text{veracity}} \;\cdot\; \underbrace{\min\!\left(\frac{m_{\mathrm{emp}}}{\tau},\,1\right)}_{\text{influence}} \;\cdot\; \underbrace{(1-\hat p)}_{\text{sobriety}}\]</p>
+
+            <h3>Veracity &mdash; does the rollout stay inside the tolerance?</h3>
+            <p>\(\sigma_{\mathrm{roll}}\) is the RMS terminal error of an \(H\)-step <em>open-loop</em> rollout, the regime a planner actually rolls out in, and \(d_{\mathrm{tol}}\) is the latent image of the environment&rsquo;s success tolerance &mdash; <em>measured</em> on probe pairs whose graded physical displacement already equals one tolerance, not extrapolated from a local slope. Only the <strong>ratio</strong> enters, so rescaling the latent leaves veracity unchanged and models of different latent dimension remain comparable.</p>
+
+            <h3>Influence &mdash; do actions command distinguishable futures, enough for this task?</h3>
+            <p>\[m_{\mathrm{emp}} = \tfrac12\log\det\!\left(I + \hat E_H^{-1}\hat S\right)\]
+            with \(\hat S\) the covariance of \(H\)-step terminal displacements induced by action perturbations and \(\hat E_H\) the predictor&rsquo;s own residual covariance rescaled to the error the rollout accumulates. This is the Gaussian channel capacity from actions to futures, invariant to any invertible linear reparameterization of the latent. It is then <strong>capped</strong> at \(\tau=82\) nats, because capacity stops buying success past a knee:</p>
+
+            <figure class="fig-wide">
+                <img src="assets/emp_plateau.png" alt="Success rate versus latent empowerment in nats for PushT, Reacher and Two-Room; below the measured knee the correlation is +0.82/+0.95/+0.82 and above it only +0.31/+0.38/+0.44.">
+                <figcaption><strong>Figure 2.</strong> Latent empowerment against planning success. The solid line marks each task&rsquo;s measured knee (\(129\), \(65\), \(59\) nats) and the dashed line the single cap \(\tau=82\) used by the influence factor. Below the knee \(\rho_{<}=+0.82/+0.95/+0.82\); above it \(\rho_{\geq}=+0.31/+0.38/+0.44\). The cap turns a task-specific quantity in nats into a bounded sufficiency condition that reads on a common scale.</figcaption>
+            </figure>
+
+            <h3>Sobriety &mdash; can a search exploit the landscape?</h3>
+            <p>At each of \(K=64\) expert anchors the goal is the future the <em>recorded</em> action reached, so the expert&rsquo;s own action is a known-good plan. A mini-CEM searches for a lower imagined cost, and sobriety counts how often it wins:
+            \[\hat p=\frac{1}{K}\sum_{k=1}^{K}\mathbb{1}\!\left[J(a^*_k) > J(a^{\mathrm{cem}}_k)\right], \qquad \mathrm{sobriety}=1-\hat p\]
+            Every anchor the search wins is an exploitable hole: the planner will be steered by a hallucinated improvement. Only the <em>sign</em> of each gap enters, which is what makes the probe cheap &mdash; \(64\times512\) rollouts, no environment.</p>
+
+            <div class="code-title">Scoring a checkpoint &mdash; the whole interface</div>
+            <div class="code-block"><pre><code><span class="keyword">from</span> viscore <span class="keyword">import</span> score_checkpoint  <span class="comment"># pip install -e .</span>
+
+f = score_checkpoint(<span class="string">"run/lewm_epoch_7_object.ckpt"</span>,
+                     <span class="string">"probes/probe_pusht.npz"</span>, task=<span class="string">"pusht"</span>)
+
+<span class="comment"># VIS 0.7213</span>
+<span class="comment"># veracity  0.9014   d_tol 4.37   sigma_roll 1.79</span>
+<span class="comment"># influence 1.0000   m_emp 147.3 / tau 82 nats   [saturated]</span>
+<span class="comment"># sobriety  0.8003   p_hat 0.200</span></code></pre>
+            </div>
+
+            <p>Scoring a world model from another codebase needs three methods &mdash; <code>encode</code>, <code>action_embed</code>, <code>predict_next</code> &mdash; and nothing else; adding a task means declaring its success tolerance, read off the environment source rather than tuned against success labels.</p>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ RESULTS ============ -->
+        <section id="results">
+            <h2>Results</h2>
+
+            <figure class="fig-wide">
+                <img src="assets/teaser.png" alt="Left: pooled Spearman correlation with planning success across datasets under CEM, VIScore 0.91 versus physical-state probe 0.61, empowerment 0.49 and straightness -0.08. Right: pooled correlation under MPPI, iCEM, predictive sampling and gradient descent.">
+                <figcaption><strong>Figure 3.</strong> Pooled correlation with planning success. <em>Left:</em> across datasets under CEM, VIScore reaches \(+0.90\) where raw empowerment reaches \(+0.82\), the physical-state probe \(+0.50\), and straightness \(-0.10\). <em>Right:</em> the same quantity under four further planners; the dashed line is CEM&rsquo;s value, and the coloured ticks repeat the three baselines.</figcaption>
+            </figure>
+
+            <h3>Association with planning success</h3>
+            <p>Within each task VIScore is comparable to raw empowerment and ahead of both representation diagnostics. The two instruments separate on the <strong>cross-task</strong> axis: pooled correlation and cross-task calibration error, where a metric measured in task-specific units cannot transfer. On the pre-registered <em>terminal</em> set of converged checkpoints, raw empowerment&rsquo;s pooled correlation is <em>negative</em> &mdash; worse than using no metric at all &mdash; while VIScore predicts a held-out task&rsquo;s success to within 4 points.</p>
+
+            <div class="table-container">
+                <p class="table-caption"><strong>Table 3.</strong> Within-task Spearman \(\rho\) with planning success, pooled \(\rho\), and cross-task calibration error in success points (leave-one-task-out isotonic fit; lower is better). The split is at the level of the <em>training run</em>: every constant is fitted on the development pool, and no checkpoint in the test pools comes from a run used to choose one. Cube is parenthesized and excluded from pooled and calibration &mdash; its label spread does not exceed its own binomial standard error, so nothing there is rankable by any metric.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th><th>PushT</th><th>Reacher</th><th>Two-Room</th><th>Cube</th><th>Pooled</th><th>Calib. err.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="7" style="background:#eef1f5;border-top:2px solid #c7ced8;border-bottom:1px solid #c7ced8;padding-top:11px;padding-bottom:9px;font-weight:600;font-size:0.86rem;letter-spacing:0.02em;color:#2b3440">development pool (137 checkpoints, 14 runs)</td></tr>
+                        <tr><td>Straightness</td><td>+0.51</td><td>+0.13</td><td>&minus;0.67</td><td>(+0.01)</td><td>+0.33</td><td>40.4</td></tr>
+                        <tr><td>Physical-state probe (\(R^2\))</td><td>+0.41</td><td>+0.74</td><td>+0.57</td><td>(&minus;0.05)</td><td>+0.77</td><td>14.5</td></tr>
+                        <tr><td>Empowerment \(m_{\mathrm{emp}}\)</td><td>+0.82</td><td>+0.86</td><td>+0.71</td><td>(&minus;0.18)</td><td>+0.40</td><td>23.1</td></tr>
+                        <tr class="highlight-row"><td><strong>VIScore</strong></td><td>+0.80</td><td>+0.83</td><td>+0.71</td><td>(&minus;0.29)</td><td><strong>+0.88</strong></td><td><strong>10.2</strong></td></tr>
+                        <tr style="border-bottom:2px solid #c7ced8"><td style="border-bottom:2px solid #c7ced8"><em>Ref.: constant predictor</em></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"><em>24.4</em></td></tr>
+                        <tr><td colspan="7" style="background:#eef1f5;border-top:2px solid #c7ced8;border-bottom:1px solid #c7ced8;padding-top:11px;padding-bottom:9px;font-weight:600;font-size:0.86rem;letter-spacing:0.02em;color:#2b3440">held-out checkpoints &mdash; runs disjoint from development (103 checkpoints, 33 runs, three evaluation seeds each)</td></tr>
+                        <tr><td>Straightness</td><td>+0.38</td><td>&minus;0.81</td><td>&minus;0.74</td><td>&mdash;</td><td>&minus;0.08</td><td>19.8</td></tr>
+                        <tr><td>Physical-state probe (\(R^2\))</td><td>+0.38</td><td>+0.65</td><td>+0.71</td><td>&mdash;</td><td>+0.61</td><td>27.6</td></tr>
+                        <tr><td>Empowerment \(m_{\mathrm{emp}}\)</td><td>+0.73</td><td>+0.82</td><td>+0.86</td><td>&mdash;</td><td>+0.49</td><td>15.6</td></tr>
+                        <tr class="highlight-row"><td><strong>VIScore</strong></td><td>+0.84</td><td>+0.72</td><td>+0.83</td><td>&mdash;</td><td><strong>+0.91</strong></td><td><strong>7.0</strong></td></tr>
+                        <tr style="border-bottom:2px solid #c7ced8"><td style="border-bottom:2px solid #c7ced8"><em>Ref.: constant predictor</em></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"><em>18.2</em></td></tr>
+                        <tr><td colspan="7" style="background:#eef1f5;border-top:2px solid #c7ced8;border-bottom:1px solid #c7ced8;padding-top:11px;padding-bottom:9px;font-weight:600;font-size:0.86rem;letter-spacing:0.02em;color:#2b3440">held-out methods &mdash; four world-modeling methods, frozen development calibration (23 checkpoints)</td></tr>
+                        <tr><td>Straightness</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>+0.22</td><td>17.4</td></tr>
+                        <tr><td>Physical-state probe (\(R^2\))</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>+0.32</td><td>16.1</td></tr>
+                        <tr><td>Empowerment \(m_{\mathrm{emp}}\)</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>+0.12</td><td>12.0</td></tr>
+                        <tr class="highlight-row"><td><strong>VIScore</strong></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><strong>+0.75</strong></td><td><strong>8.3</strong></td></tr>
+                        <tr style="border-bottom:2px solid #c7ced8"><td style="border-bottom:2px solid #c7ced8"><em>Ref.: constant predictor</em></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"><em>11.3</em></td></tr>
+                        <tr><td colspan="7" style="background:#eef1f5;border-top:2px solid #c7ced8;border-bottom:1px solid #c7ced8;padding-top:11px;padding-bottom:9px;font-weight:600;font-size:0.86rem;letter-spacing:0.02em;color:#2b3440">held-out dataset &mdash; the unseen MAZE task, frozen calibration (20 checkpoints, 2 runs)</td></tr>
+                        <tr><td>Straightness</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>+0.66</td><td>31.2</td></tr>
+                        <tr><td>Physical-state probe (\(R^2\))</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>+0.75</td><td>45.4</td></tr>
+                        <tr><td>Empowerment \(m_{\mathrm{emp}}\)</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>+0.87</td><td><strong>9.2</strong></td></tr>
+                        <tr class="highlight-row"><td><strong>VIScore</strong></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><strong>+0.87</strong></td><td><strong>11.5</strong></td></tr>
+                        <tr style="border-bottom:2px solid #c7ced8"><td style="border-bottom:2px solid #c7ced8"><em>Ref.: constant predictor</em></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"></td><td style="border-bottom:2px solid #c7ced8"><em>41.7</em></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Which factor binds, and where</h3>
+            <p>The product is the summary; the factors are the diagnosis. No single factor dominates every distribution shift, and the strongest one <em>changes with the regime</em> &mdash; so a metric that reports only its product hides the part a practitioner needs.</p>
+
+            <div class="table-container">
+                <p class="table-caption"><strong>Table 4.</strong> Factor ablation: pooled \(\rho\) / calibration error per pool. Influence goes silent where capacity has saturated (numerically \(1\) for every PushT checkpoint on the terminal pool, hence \(-0.01\)) and inverts on held-out methods; veracity mis-calibrates on the held-out dataset. The fixed product never falls below \(+0.66\) on any pool.</p>
+                <table>
+                    <thead>
+                        <tr><th>Pool (n / runs)</th><th class="highlight-col">VIS = V&middot;I&middot;S</th><th>V veracity</th><th>I influence</th><th>S sobriety</th><th><em>Ref.</em></th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>development (137/14)</td><td class="highlight-col">+0.88 / <strong>10.2</strong></td><td>+0.80 / 12.4</td><td>+0.54 / 21.9</td><td><strong>+0.89</strong> / <strong>9.3</strong></td><td><em>24.4</em></td></tr>
+                        <tr><td>held-out ckpt (103/33)</td><td class="highlight-col"><strong>+0.91</strong> / <strong>7.0</strong></td><td>+0.81 / 12.7</td><td>+0.65 / 14.0</td><td>+0.89 / 7.3</td><td><em>18.2</em></td></tr>
+                        <tr><td>held-out method (23/23)</td><td class="highlight-col"><strong>+0.75</strong> / <strong>8.3</strong></td><td>+0.62 / 10.4</td><td>+0.09 / 12.2</td><td>+0.68 / 8.9</td><td><em>11.3</em></td></tr>
+                        <tr><td>held-out dataset (20/2)</td><td class="highlight-col">+0.87 / 11.5</td><td>+0.85 / 31.9</td><td><strong>+0.87</strong> / 9.4</td><td><strong>+0.88</strong> / <strong>8.3</strong></td><td><em>41.7</em></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Not an artifact of CEM</h3>
+            <p>Sobriety contains a search by construction, which raises the question of whether the score is specific to CEM. Keeping the checkpoint, goals, episode count and planning cost fixed and replacing only the optimizer, VIScore keeps <strong>positive within-task association in all 18 planner &times; task cells</strong> (\(+0.29\) to \(+0.91\), median \(+0.67\)), and it does <em>not</em> decay as the planner weakens: the rank correlation between a planner&rsquo;s success deficit against CEM and its within-task \(\rho\) is \(+0.07\). Predictive sampling scores \(43.3\) on PushT against CEM&rsquo;s \(84.7\), and VIScore still ranks that task&rsquo;s checkpoints at \(+0.76\) &mdash; a planner that finds much worse plans still finds better plans with a better model.</p>
+
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ LIMITATIONS ============ -->
+        <section id="limitations">
+            <h2>What the score does not claim</h2>
+
+            <p>These are measured boundaries, not caveats added for safety:</p>
+
+            <ul>
+                <li><strong>Search-based planning only.</strong> An amortized policy &mdash; goal-conditioned inverse dynamics, behaviour cloning &mdash; never runs a search, so sobriety has no estimand, and its success was measured to be independent of rollout fidelity. The released code can score any subset of the factors, but a partial score is a description of the model, not a validated predictor of that policy&rsquo;s success.</li>
+                <li><strong>Discrete-mode success is out of scope.</strong> Cube succeeds only if the gripper enters a closed mode on the block, a discrete transition none of the three continuous factors represents; its influence factor reads exactly \(1\) on every checkpoint. We report it as a missing axis, not a verdict.</li>
+            </ul>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ============ CONCLUSION ============ -->
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+
+            <p>VIScore shows that latent world-model quality for planning decomposes into three <strong>measurable prerequisites</strong>, and that anchoring each of them to the task&rsquo;s own success tolerance is what makes readings transfer where quantities in nats do not. Because it costs seconds rather than GPU-hours and names the binding factor rather than only ranking checkpoints, it is usable both for model selection and for deciding what to fix &mdash; and its factor decomposition is what let us find that a reported difference between two regularizers was a batch-size knob rather than the objective.</p>
+
+            <p>Everything needed to check this is released: the code, the checkpoints organized by evaluation pool, and the derived quantities that let the paper&rsquo;s tables be recomputed <strong>on a CPU in seconds</strong>, with no GPU, dataset or checkpoint download.</p>
+        </section>
+
+        <!-- BibTeX -->
+        <div class="bibtex-section">
+            <h3>Citation</h3>
+            <div class="bibtex-container">
+                <button class="copy-btn" id="copy-bibtex-btn" onclick="copyBibtex()">Copy</button>
+                <pre id="bibtex-text">@article{wu2026viscore,
+  title         = {VIScore: Diagnosing Planning-Relevant Quality in Latent World Models},
+  author        = {Wu, Haiyu and Balestriero, Randall and Levine, Morgan},
+  journal       = {arXiv preprint arXiv:2608.11174},
+  year          = {2026},
+  eprint        = {2608.11174},
+  archivePrefix = {arXiv}
+}</pre>
+            </div>
+        </div>
+
+    </article>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <p>&copy; 2026 Haiyu Wu. <a href="../index.html">Back to homepage</a>.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+    // === BibTeX copy ===
+    function copyBibtex() {
+        const text = document.getElementById('bibtex-text').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copy-bibtex-btn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    }
+
+    // === Sticky TOC: show on scroll, highlight active section ===
+    (function() {
+        const toc = document.getElementById('toc');
+        const header = document.querySelector('.header-wrapper');
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = toc ? toc.querySelectorAll('a') : [];
+
+        function updateTOC() {
+            // Show/hide TOC
+            if (toc && header) {
+                const headerBottom = header.getBoundingClientRect().bottom;
+                toc.classList.toggle('visible', headerBottom < 0);
+            }
+
+            // Highlight active section
+            let current = '';
+            sections.forEach(section => {
+                const top = section.getBoundingClientRect().top;
+                if (top < 200) current = section.id;
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+            });
+        }
+
+        window.addEventListener('scroll', updateTOC, { passive: true });
+        updateTOC();
+    })();
+
+    // === Smooth scroll for TOC links ===
+    document.querySelectorAll('.toc-container a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const navHeight = document.querySelector('.top-nav').offsetHeight;
+                const y = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>
